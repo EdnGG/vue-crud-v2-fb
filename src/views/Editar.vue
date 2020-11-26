@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h1>Editar</h1>
-    <div>{{ tarea.id }} - {{ tarea.nombre }}</div>
+    <h1>Edit To Do</h1>
+    <!-- <div>{{ tarea.id }} - {{ tarea.nombre }}</div> -->
     <form @submit.prevent="editarTarea(tarea)">
-      <input type="text" v-model="tarea.nombre" />
-      <button type="submit">Edit</button>
+      <input class="form-control mb-2" type="text" v-model="tarea.nombre" />
+      <button class="btn btn-warning" type="submit">Edit</button>
     </form>
   </div>
 </template>

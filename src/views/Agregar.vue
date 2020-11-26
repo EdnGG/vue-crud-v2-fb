@@ -2,8 +2,18 @@
   <div>
     <h1>Add Todo</h1>
     <form @submit.prevent="agregarTarea(nombre)">
-      <input type="text" v-model="nombre" />
-      <button type="submit">Add</button>
+      <!-- <div class="input-group mb-2 mr-sm-2"> -->
+      <!-- <div class="input-group-prepend"> -->
+      <!-- <div class="input-group-text">Name</div> -->
+      <!-- </div> -->
+      <input
+        type="text"
+        class="form-control mb-2"
+        v-model="nombre"
+        placeholder="New Task"
+      />
+      <!-- </div> -->
+      <button type="submit" class="btn btn-primary">Add</button>
     </form>
   </div>
 </template>

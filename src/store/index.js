@@ -1,7 +1,7 @@
 import Vue from "vue";
 import Vuex from "vuex";
-import router from "../router/index.js";
-import { db } from "../firebase";
+import router from "../router";
+import { db, auth } from "../firebase";
 
 Vue.use(Vuex);
 
@@ -9,21 +9,88 @@ export default new Vuex.Store({
   state: {
     tareas: [],
     tarea: { nombre: "", id: "" },
+    usuario: null,
+    error: null,
   },
   mutations: {
+    setUsuario(state, payload) {
+      state.usuario = payload;
+    },
+    setError(state, payload) {
+      state.error = payload;
+    },
     setTareas(state, payload) {
       state.tareas = payload;
     },
     setTarea(state, payload) {
       state.tarea = payload;
     },
+    setEliminarTareas(state, payload) {
+      // Va a filtrar el id eliminado del array original
+      // devolviendo el array original sin el id filtrado
+      state.tareas = state.tareas.filter((item) => item.id !== payload);
+    },
   },
   actions: {
-    getTareas({ commit }) {
-      // esta variable es diferente alo qu esta en state
+    detectarUsuario({ commit }, usuario) {
+      commit("setUsuario", usuario);
+    },
+    cerrarSecion({ commit }) {
+      auth.signOut().then(() => {
+        router.push("/login");
+      });
+
+      // commit('deleteuser', userId)
+    },
+    ingresoUsuario({ commit }, usuario) {
+      auth
+        .signInWithEmailAndPassword(usuario.email, usuario.password)
+        .then((res) => {
+          console.log(res);
+          const usuarioLogeado = {
+            email: res.user.email,
+            uid: res.user.uid,
+          };
+          commit("setUsuario", usuarioLogeado);
+          router.push("/");
+        })
+        .catch((error) => {
+          console.log(`Error: ${error.message}`);
+          console.log(error);
+          commit("setError", error);
+        });
+    },
+    crearUsuario({ commit }, usuario) {
+      auth
+        .createUserWithEmailAndPassword(usuario.email, usuario.password)
+        .then((res) => {
+          console.log(res);
+          const usuarioCreado = {
+            email: res.user.email,
+            uid: res.user.uid,
+          };
+          db.collection(res.user.email);
+          // .add({
+          //   nombre: "tarea de ejemplo",
+          // })
+          // .then(() => {
+          commit("setUsuario", usuarioCreado);
+          router.push("/");
+          // })
+          // .catch((error) => {
+          //   console.log(error);
+          // });
+        })
+        .catch((error) => {
+          console.log(`Error: ${error.message}`);
+          commit("setError", error);
+        });
+    },
+    getTareas({ commit, state }) {
+      // esta variable es diferente a lo que  esta en state
       // Este seria un  array de objetos
       const tareas = [];
-      db.collection("tareas")
+      db.collection(state.usuario.email)
         .get()
         .then((res) => {
           res.forEach((doc) => {
@@ -36,8 +103,8 @@ export default new Vuex.Store({
           commit("setTareas", tareas);
         });
     },
-    getTarea({ commit }, idTarea) {
-      db.collection("tareas")
+    getTarea({ commit, state }, idTarea) {
+      db.collection(state.usuario.email)
         .doc(idTarea)
         .get()
         .then((doc) => {
@@ -48,8 +115,8 @@ export default new Vuex.Store({
           commit("setTarea", tarea);
         });
     },
-    editarTarea({ commit }, tarea) {
-      db.collection("tareas")
+    editarTarea({ commit, state }, tarea) {
+      db.collection(state.usuario.email)
         .doc(tarea.id)
         .update({
           nombre: tarea.nombre,
@@ -59,8 +126,8 @@ export default new Vuex.Store({
           router.push("/");
         });
     },
-    agregarTarea({ commit }, nombreTarea) {
-      db.collection("tareas")
+    agregarTarea({ commit, state }, nombreTarea) {
+      db.collection(state.usuario.email)
         .add({
           nombre: nombreTarea,
         })
@@ -68,6 +135,25 @@ export default new Vuex.Store({
           console.log(doc.id);
           router.push("/");
         });
+    },
+    eliminarTarea({ commit, state, dispatch }, idTarea) {
+      db.collection(state.usuario.email)
+        .doc(idTarea)
+        .delete()
+        .then(() => {
+          console.log("Task already deleted");
+          // dispatch("getTareas"); Opcion 1
+          commit("setEliminarTareas", idTarea);
+        });
+    },
+  },
+  getters: {
+    existeUsuario(state) {
+      if (state.usuario === null) {
+        return false;
+      } else {
+        return true;
+      }
     },
   },
   modules: {},
