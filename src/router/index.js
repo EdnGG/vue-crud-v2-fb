@@ -38,6 +38,12 @@ const routes = [
     component: () =>
       import(/* webpackChunkName: "about" */ "../views/Acceso.vue"),
   },
+  {
+    path: "/boostrap",
+    name: "Boostrap",
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../views/Boostrap.vue"),
+  },
 ];
 
 const router = new VueRouter({
