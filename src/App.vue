@@ -1,5 +1,16 @@
 <template>
-  <div id="app" class="container mt-2">
+  <div id="app" class="container mb-2">
+    <!-- <b-navbar toogleable="md" type="dark" variant="danger">
+      <b-navbar-brand href="#">NavBar</b-navbar-brand>
+      <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
+      <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav>
+          <b-nav-item :to="{ name: 'Inicio' }" exact>Home</b-nav-item>
+          <b-nav-item :to="{ name: 'Acceso' }">About</b-nav-item>
+        </b-navbar-nav>
+      </b-collapse>
+    </b-navbar> -->
+
     <div class="text-center">
       <router-link to="/" v-if="existeUsuario" class="btn btn-dark mr-2">
         Start

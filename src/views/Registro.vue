@@ -1,42 +1,65 @@
 <template>
   <div class="container">
     <h1>Register</h1>
-    <form @submit.prevent="crearUsuario({ email: email, password: pass1 })">
-      <!-- <div class="input-group mb-2 mr-sm-2">
-        <div class="input-group-prepend">
-          <div class="input-group-text">Name</div>
-        </div> -->
-
+    <form
+      @submit.prevent="
+        crearUsuario({
+          email: $v.email.$model,
+          password: $v.pass1.$model,
+        })
+      "
+    >
       <input
-        class="form-control mb-2"
+        class="form-control my-2"
         type="email"
         placeholder="email"
-        v-model="email"
+        v-model="$v.email.$model"
       />
+      <small class="text-danger d-block" v-if="!$v.email.email"
+        >Invalid email</small
+      >
+      <small class="text-danger d-block" v-if="!$v.email.required"
+        >Required</small
+      >
 
       <input
-        class="form-control mb-2"
+        class="form-control my-2"
         type="password"
         placeholder="password"
-        v-model="pass1"
+        v-model="$v.pass1.$model"
       />
+      <small class="text-danger d-block" v-if="!$v.pass1.minLength"
+        >Password must be more of 6 character length</small
+      >
+      <small class="text-danger d-block" v-if="!$v.pass1.required"
+        >Required</small
+      >
 
       <input
-        class="form-control mb-2"
+        class="form-control my-2"
         type="password"
         placeholder="repeat password"
         v-model="pass2"
       />
+      <small class="text-danger d-block" v-if="!$v.pass2.sameAs"
+        >Password does not match</small
+      >
       <button :disabled="!desactivar" class="btn btn-primary" type="submit">
         Register
       </button>
-      <!-- </div> -->
     </form>
+    <small
+      class="text-danger d-block"
+      v-if="error === 'auth/email-already-in-use'"
+      >User already registered</small
+    >
     <!-- <p v-if="">{{ error.code }}</p> -->
+    <!-- {{ $v.pass1.$model }} -->
   </div>
 </template>
 
 <script>
+import { required, minLength, email, sameAs } from "vuelidate/lib/validators";
 import { mapActions, mapState } from "vuex";
 export default {
   name: "Registro",
@@ -60,6 +83,11 @@ export default {
   // created() {},
   methods: {
     ...mapActions(["crearUsuario"]),
+  },
+  validations: {
+    email: { email, required },
+    pass1: { required, minLength: minLength(6) },
+    pass2: { sameAs: sameAs("pass1") },
   },
 };
 </script>

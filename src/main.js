@@ -5,12 +5,15 @@ import store from "./store";
 import { auth } from "./firebase";
 import { BootstrapVue, IconsPlugin } from "bootstrap-vue";
 
-// Install BootstrapVue
+// BootstrapVue
 Vue.use(BootstrapVue);
 Vue.use(IconsPlugin);
-
 import "bootstrap/dist/css/bootstrap.css";
 import "bootstrap-vue/dist/bootstrap-vue.css";
+
+// Vuelidate
+import Vuelidate from "vuelidate";
+Vue.use(Vuelidate);
 
 Vue.config.productionTip = false;
 

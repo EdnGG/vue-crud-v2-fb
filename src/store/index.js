@@ -11,6 +11,8 @@ export default new Vuex.Store({
     tarea: { nombre: "", id: "" },
     usuario: null,
     error: null,
+    carga: false,
+    texto: "",
   },
   mutations: {
     setUsuario(state, payload) {
@@ -30,8 +32,15 @@ export default new Vuex.Store({
       // devolviendo el array original sin el id filtrado
       state.tareas = state.tareas.filter((item) => item.id !== payload);
     },
+    cargarFirebase(state, payload) {
+      state.carga = payload;
+    },
   },
   actions: {
+    buscador({ commit, state }, payload) {
+      state.texto = payload.toLowerCase();
+      console.log(payload);
+    },
     detectarUsuario({ commit }, usuario) {
       commit("setUsuario", usuario);
     },
@@ -55,9 +64,9 @@ export default new Vuex.Store({
           router.push("/");
         })
         .catch((error) => {
-          console.log(`Error: ${error.message}`);
-          console.log(error);
-          commit("setError", error);
+          console.log(`Error: ${error.code}`);
+          console.log(error.code);
+          commit("setError", error.code);
         });
     },
     crearUsuario({ commit }, usuario) {
@@ -82,11 +91,13 @@ export default new Vuex.Store({
           // });
         })
         .catch((error) => {
-          console.log(`Error: ${error.message}`);
-          commit("setError", error);
+          console.log(`Error: ${error.code}`);
+          commit("setError", error.code);
         });
     },
     getTareas({ commit, state }) {
+      commit("cargarFirebase", true);
+
       // esta variable es diferente a lo que  esta en state
       // Este seria un  array de objetos
       const tareas = [];
@@ -100,8 +111,11 @@ export default new Vuex.Store({
             tarea.id = doc.id;
             tareas.push(tarea);
           });
-          commit("setTareas", tareas);
+          setTimeout(() => {
+            commit("cargarFirebase", false);
+          }, 2000);
         });
+      commit("setTareas", tareas);
     },
     getTarea({ commit, state }, idTarea) {
       db.collection(state.usuario.email)
@@ -127,13 +141,15 @@ export default new Vuex.Store({
         });
     },
     agregarTarea({ commit, state }, nombreTarea) {
+      commit("cargarFirebase", true);
       db.collection(state.usuario.email)
         .add({
           nombre: nombreTarea,
         })
         .then((doc) => {
           console.log(doc.id);
-          router.push("/");
+          router.push({ name: "Inicio" });
+          commit("cargarFirebase", false);
         });
     },
     eliminarTarea({ commit, state, dispatch }, idTarea) {
@@ -154,6 +170,16 @@ export default new Vuex.Store({
       } else {
         return true;
       }
+    },
+    arrayFiltrado(state) {
+      let arrayFiltrado = [];
+      for (let tarea of state.tareas) {
+        let nombre = tarea.nombre.toLowerCase();
+        if (nombre.indexOf(state.texto) >= 0) {
+          arrayFiltrado.push(tarea);
+        }
+      }
+      return arrayFiltrado;
     },
   },
   modules: {},
